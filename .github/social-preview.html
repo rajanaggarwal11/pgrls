@@ -1,0 +1,229 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap"
+    />
+    <style>
+      /* Palette sampled from codingninjas.com: #f66c3b is the dominant accent,
+         #141414 the ground, #fdc7a9 the warm tint, #12b8ff the cool counterpoint. */
+      :root {
+        --ground: #141414;
+        --panel: #1f1f1f;
+        --edge: #403f3f;
+        --accent: #f66c3b;
+        --accent-2: #fb813e;
+        --tint: #fdc7a9;
+        --cool: #12b8ff;
+        --text: #fafafa;
+        --muted: #9e9e9e;
+        --dim: #6c6865;
+      }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        width: 1280px;
+        height: 640px;
+      }
+      body {
+        background: var(--ground);
+        font-family: "Plus Jakarta Sans", system-ui, sans-serif;
+        display: grid;
+        grid-template-columns: 1fr 600px;
+        align-items: center;
+        gap: 56px;
+        padding: 0 68px;
+        position: relative;
+        overflow: hidden;
+      }
+      /* Warm bloom behind the terminal, so the right half carries weight. */
+      body::before {
+        content: "";
+        position: absolute;
+        right: -160px;
+        top: -190px;
+        width: 760px;
+        height: 760px;
+        background: radial-gradient(circle, rgba(246, 108, 59, 0.22), transparent 62%);
+        pointer-events: none;
+      }
+      /* Accent rail, the one piece of chrome. */
+      body::after {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 10px;
+        background: linear-gradient(180deg, var(--accent), var(--accent-2));
+      }
+
+      .left {
+        position: relative;
+        z-index: 1;
+      }
+      .word {
+        font-family: "JetBrains Mono", monospace;
+        font-weight: 700;
+        font-size: 62px;
+        line-height: 1.02;
+        letter-spacing: -0.045em;
+        color: var(--text);
+      }
+      .word .accent {
+        color: var(--accent);
+      }
+      .tag {
+        margin-top: 22px;
+        font-size: 24px;
+        font-weight: 500;
+        line-height: 1.42;
+        color: var(--muted);
+        max-width: 516px;
+        letter-spacing: -0.008em;
+      }
+      .tag b {
+        color: var(--tint);
+        font-weight: 700;
+      }
+      .chips {
+        margin-top: 32px;
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+      .chip {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 14px;
+        font-weight: 500;
+        color: var(--muted);
+        border: 1px solid var(--edge);
+        border-radius: 999px;
+        padding: 7px 15px;
+        letter-spacing: 0.02em;
+      }
+      .chip.hot {
+        color: var(--accent);
+        border-color: rgba(246, 108, 59, 0.5);
+      }
+
+      .term {
+        position: relative;
+        z-index: 1;
+        background: var(--panel);
+        border: 1px solid var(--edge);
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 26px 60px rgba(0, 0, 0, 0.5);
+      }
+      .bar {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 13px 18px;
+        border-bottom: 1px solid var(--edge);
+        background: #191919;
+      }
+      .dot {
+        width: 11px;
+        height: 11px;
+        border-radius: 50%;
+        background: #3a3a3a;
+      }
+      .dot.live {
+        background: var(--accent);
+      }
+      .bar span {
+        margin-left: 8px;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 13px;
+        color: var(--dim);
+      }
+      .body {
+        padding: 22px 24px 24px;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 17px;
+        line-height: 1.85;
+        color: #c9c9c9;
+      }
+      .prompt {
+        color: var(--cool);
+      }
+      .err {
+        color: var(--accent);
+        font-weight: 700;
+      }
+      .warn {
+        color: var(--tint);
+        font-weight: 700;
+      }
+      .sub {
+        color: var(--dim);
+        padding-left: 22px;
+        font-size: 15px;
+      }
+      .rule {
+        height: 1px;
+        background: var(--edge);
+        margin: 14px 0 12px;
+      }
+      .sum {
+        color: var(--muted);
+        font-size: 15px;
+      }
+      .sum b {
+        color: var(--accent);
+        font-weight: 700;
+      }
+      .foot {
+        position: absolute;
+        left: 68px;
+        bottom: 34px;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 15px;
+        color: var(--dim);
+        letter-spacing: 0.03em;
+        z-index: 1;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="left">
+      <div class="word">pg<span class="accent">rls</span></div>
+      <div class="tag">
+        Postgres row-level security you can <b>actually verify</b>. One test that proves no table is
+        exposed.
+      </div>
+      <div class="chips">
+        <span class="chip hot">npm i pgrls</span>
+        <span class="chip">drizzle · pg</span>
+        <span class="chip">postgres 14-18</span>
+      </div>
+    </div>
+
+    <div class="term">
+      <div class="bar">
+        <i class="dot live"></i><i class="dot"></i><i class="dot"></i>
+        <span>vitest · every table is protected</span>
+      </div>
+      <div class="body">
+        <div><span class="prompt">$</span> await assertFullRlsCoverage(db)</div>
+        <div class="sub" style="padding-left: 0">3 of 14 tables are not protected.</div>
+        <div><span class="err">✗</span> audit_log &nbsp;&nbsp;&nbsp;RLS is not enabled</div>
+        <div><span class="err">✗</span> webhook_event&nbsp; enabled, not FORCED</div>
+        <div class="sub">the table owner bypasses it</div>
+        <div>
+          <span class="warn">!</span> session &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;RLS on, no policy
+        </div>
+      </div>
+    </div>
+
+    <div class="foot">github.com/rajanaggarwal11/pgrls</div>
+  </body>
+</html>
