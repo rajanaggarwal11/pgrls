@@ -1,0 +1,88 @@
+{
+  "name": "pgrls",
+  "version": "0.1.0",
+  "description": "Postgres row-level security you can actually verify. Policies as TypeScript, tenant context as a transaction, and one test that proves no table is exposed.",
+  "keywords": [
+    "postgres",
+    "postgresql",
+    "rls",
+    "row-level-security",
+    "multi-tenant",
+    "multitenancy",
+    "tenant-isolation",
+    "drizzle",
+    "drizzle-orm",
+    "security",
+    "sql"
+  ],
+  "license": "MIT",
+  "author": "Rajan Aggarwal",
+  "homepage": "https://github.com/rajanaggarwal11/pgrls#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rajanaggarwal11/pgrls.git"
+  },
+  "bugs": {
+    "url": "https://github.com/rajanaggarwal11/pgrls/issues"
+  },
+  "type": "module",
+  "engines": {
+    "node": ">=22.13"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./drizzle": {
+      "types": "./dist/drizzle.d.ts",
+      "default": "./dist/drizzle.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "check": "pnpm lint && pnpm typecheck && pnpm test && pnpm build",
+    "attw": "attw --pack . --ignore-rules no-resolution cjs-resolves-to-esm",
+    "publint": "publint",
+    "release": "pnpm build && changeset publish",
+    "prepublishOnly": "pnpm build"
+  },
+  "peerDependencies": {
+    "drizzle-orm": ">=0.30.0"
+  },
+  "peerDependenciesMeta": {
+    "drizzle-orm": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@arethetypeswrong/cli": "^0.18.5",
+    "@changesets/changelog-github": "^0.5.0",
+    "@changesets/cli": "^2.27.10",
+    "@eslint/js": "^9.17.0",
+    "@types/node": "^22.10.2",
+    "@types/pg": "^8.11.10",
+    "drizzle-orm": "^0.38.2",
+    "eslint": "^9.17.0",
+    "pg": "^8.13.1",
+    "prettier": "^3.4.2",
+    "publint": "^0.2.12",
+    "tsup": "^8.3.5",
+    "typescript": "^5.7.2",
+    "typescript-eslint": "^8.18.1",
+    "vitest": "^2.1.8"
+  },
+  "packageManager": "pnpm@11.22.0"
+}

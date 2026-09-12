@@ -1,0 +1,16 @@
+{
+  "name": "pgrls",
+  "image": "mcr.microsoft.com/devcontainers/typescript-node:1-22-bookworm",
+  "features": {
+    "ghcr.io/devcontainers/features/postgresql:1": { "version": "16" }
+  },
+  "containerEnv": {
+    "TEST_DATABASE_URL": "postgres://postgres:postgres@localhost:5432/pgrls_test"
+  },
+  "postCreateCommand": "corepack enable && pnpm install --frozen-lockfile && pnpm build",
+  "customizations": {
+    "vscode": {
+      "extensions": ["dbaeumer.vscode-eslint", "esbenp.prettier-vscode", "vitest.explorer"]
+    }
+  }
+}

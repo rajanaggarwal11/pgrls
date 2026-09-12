@@ -1,0 +1,13 @@
+import { defineConfig } from "tsup";
+
+export default defineConfig({
+  entry: ["src/index.ts", "src/drizzle.ts"],
+  format: ["esm"],
+  target: "node22",
+  dts: true,
+  clean: true,
+  sourcemap: true,
+  splitting: false,
+  // drizzle-orm is an optional peer: importing pgrls must not pull it in.
+  external: ["drizzle-orm"],
+});

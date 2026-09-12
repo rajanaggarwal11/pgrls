@@ -1,0 +1,3 @@
+# pgrls is a single package; pnpm 11 reads workspace settings from this file.
+allowBuilds:
+  esbuild: true
