@@ -72,7 +72,7 @@
     "@changesets/changelog-github": "^1.0.1",
     "@changesets/cli": "^3.0.2",
     "@eslint/js": "^10.0.1",
-    "@types/node": "^22.10.2",
+    "@types/node": "^26.5.0",
     "@types/pg": "^8.11.10",
     "drizzle-orm": "^0.45.2",
     "eslint": "^10.10.0",
