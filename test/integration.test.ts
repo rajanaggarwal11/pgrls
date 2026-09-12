@@ -12,7 +12,7 @@ import { currentTenant, withTenant } from "../src/tenant.js";
 
 // Named DATABASE_URL, not URL: the latter shadows the global URL constructor.
 const DATABASE_URL =
-  process.env.TEST_DATABASE_URL ?? "postgres://testmaxx@127.0.0.1:5433/pgrls_test";
+  process.env.TEST_DATABASE_URL ?? "postgres://postgres:postgres@localhost:5432/pgrls_test";
 
 const SCHEMA = "pgrls_it";
 const ORG_A = "11111111-1111-1111-1111-111111111111";
