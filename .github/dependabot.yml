@@ -14,6 +14,11 @@ updates:
       # support; minor and patch bumps are unaffected.
       - dependency-name: typescript
         update-types: ["version-update:semver-major"]
+      # @types/node tracks the OLDEST Node this package supports, not the newest
+      # published. Typing against a later major lets an API that does not exist on
+      # the supported floor pass typecheck.
+      - dependency-name: "@types/node"
+        update-types: ["version-update:semver-major"]
   - package-ecosystem: github-actions
     directory: /
     schedule:
