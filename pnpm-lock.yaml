@@ -32,9 +32,6 @@ importers:
       eslint:
         specifier: ^10.10.0
         version: 10.10.0(supports-color@7.2.0)
-      pg:
-        specifier: ^8.13.1
-        version: 8.23.0
       postgres:
         specifier: ^3.4.9
         version: 3.4.9
@@ -56,6 +53,10 @@ importers:
       vitest:
         specifier: ^5.0.0
         version: 5.0.0(@types/node@22.20.1)(vite@8.3.0(@types/node@22.20.1)(esbuild@0.27.7)(yaml@2.9.0))
+    optionalDependencies:
+      pg:
+        specifier: ^8.13.1
+        version: 8.23.0
 
 packages:
 
@@ -2923,13 +2924,15 @@ snapshots:
   pg-cloudflare@1.4.0:
     optional: true
 
-  pg-connection-string@2.14.0: {}
+  pg-connection-string@2.14.0:
+    optional: true
 
   pg-int8@1.0.1: {}
 
   pg-pool@3.14.0(pg@8.23.0):
     dependencies:
       pg: 8.23.0
+    optional: true
 
   pg-protocol@1.16.0: {}
 
@@ -2950,10 +2953,12 @@ snapshots:
       pgpass: 1.0.5
     optionalDependencies:
       pg-cloudflare: 1.4.0
+    optional: true
 
   pgpass@1.0.5:
     dependencies:
       split2: 4.2.0
+    optional: true
 
   picocolors@1.1.1: {}
 
@@ -3094,7 +3099,8 @@ snapshots:
 
   source-map@0.7.6: {}
 
-  split2@4.2.0: {}
+  split2@4.2.0:
+    optional: true
 
   stackback@0.0.2: {}
 

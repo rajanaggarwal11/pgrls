@@ -44,6 +44,8 @@ jobs:
           node-version: 22
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      # Build first: test/binary.test.ts runs the built CLI through a symlink.
+      - run: pnpm build
       - run: pnpm test
 
   quality:

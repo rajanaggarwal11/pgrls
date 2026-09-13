@@ -23,6 +23,26 @@ pgrls: 3 of 14 tables are not protected.
 
 Run that against a multi-tenant database you didn't write and see what comes back.
 
+Or skip the test file entirely and point the CLI at a database:
+
+```bash
+DATABASE_URL=postgres://app@db.internal/prod npx pgrls audit
+```
+
+```
+pgrls audit · prod on db.internal as app
+
+pgrls: 3 of 14 tables are not protected.
+
+  ✗ public.audit_log  row-level security is not enabled — every row is readable by any role
+  ✗ public.invoice    RLS is enabled but not FORCED — the table owner bypasses it, and most applications connect as the owner of their own tables
+  ✗ public.session    RLS is enabled with no policy — every query against this table returns nothing
+```
+
+Exit `1` when something is exposed, `0` when nothing is, `2` when it couldn't run — so it drops straight into CI. `--json` for a stable machine-readable report, `--schema` and `--exclude` (both repeatable) to scope it. The connection string is never written to any stream, including inside error messages; prefer `DATABASE_URL` over an argument so it stays out of your shell history.
+
+**Run it as the role your application connects with.** A superuser cannot see policies, and rather than pass, the audit says so in the header and exits `1`. `pg` is an optional dependency so `npx pgrls audit` works with nothing else installed; a project that already has `postgres` (postgres.js) is used as-is.
+
 ## Why this exists
 
 RLS is the right answer for tenant isolation: the database enforces it, so a forgotten `WHERE org_id = $1` stops being a data breach. The problem is that RLS has three failure modes that all look like success, and none of them show up in your tests, your types, or your code review.
@@ -99,17 +119,18 @@ Run it as **the role your application connects with**, not as your migration sup
 
 ## API
 
-| Export                                    | What it does                                           |
-| ----------------------------------------- | ------------------------------------------------------ |
-| `assertFullRlsCoverage(client, opts?)`    | Throws `RlsCoverageError` if any table is unprotected. |
-| `rlsCoverage(client, opts?)`              | The same audit as data, without throwing.              |
-| `auditRole(client)`                       | Who the connection is, and whether it bypasses RLS.    |
-| `withTenant(client, id, fn, opts?)`       | Runs `fn` in a transaction scoped to a tenant.         |
-| `currentTenant(client, opts?)`            | The tenant Postgres currently sees, or null.           |
-| `definePolicy(table, opts)`               | Resolves a policy spec, applying defaults.             |
-| `policySql(spec)` / `dropPolicySql(spec)` | The statements, for your migration.                    |
-| `applyPolicy(client, spec)`               | Runs them, in one transaction.                         |
-| `rls(table, opts)` — from `pgrls/drizzle` | `definePolicy` for a Drizzle table.                    |
+| Export                                    | What it does                                                                                                              |
+| ----------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| `assertFullRlsCoverage(client, opts?)`    | Throws `RlsCoverageError` if any table is unprotected.                                                                    |
+| `rlsCoverage(client, opts?)`              | The same audit as data, without throwing.                                                                                 |
+| `auditRole(client)`                       | Who the connection is, and whether it bypasses RLS.                                                                       |
+| `withTenant(client, id, fn, opts?)`       | Runs `fn` in a transaction scoped to a tenant.                                                                            |
+| `currentTenant(client, opts?)`            | The tenant Postgres currently sees, or null.                                                                              |
+| `definePolicy(table, opts)`               | Resolves a policy spec, applying defaults.                                                                                |
+| `policySql(spec)` / `dropPolicySql(spec)` | The statements, for your migration.                                                                                       |
+| `applyPolicy(client, spec)`               | Runs them, in one transaction.                                                                                            |
+| `rls(table, opts)` — from `pgrls/drizzle` | `definePolicy` for a Drizzle table.                                                                                       |
+| `npx pgrls audit [url]`                   | The coverage audit as a CLI. Exit 0/1/2, `--json`, `--schema`, `--exclude`, `--allow-unforced`, `--allow-bypassing-role`. |
 
 **Coverage options:** `schemas` (default `["public"]`), `exclude` (names or `schema.name`), `allowUnforced`, `allowBypassingRole`. The last two exist so you can opt out deliberately; both default to the strict reading.
 
