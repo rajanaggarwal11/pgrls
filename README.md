@@ -35,6 +35,8 @@ RLS is the right answer for tenant isolation: the database enforces it, so a for
 
 None of this is exotic. All of it is easy to get wrong once and never notice.
 
+Each trap is reproduced step by step, in `psql`, in [docs/rls-traps.md](./docs/rls-traps.md).
+
 ## Install
 
 ```bash
