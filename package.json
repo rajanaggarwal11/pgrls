@@ -3,6 +3,8 @@
   "version": "0.1.0",
   "description": "Postgres row-level security you can actually verify. Policies as TypeScript, tenant context as a transaction, and one test that proves no table is exposed.",
   "keywords": [
+    "audit",
+    "cli",
     "drizzle",
     "drizzle-orm",
     "multi-tenant",
@@ -14,6 +16,7 @@
     "rls",
     "row-level-security",
     "security",
+    "security-audit",
     "sql",
     "tenant-isolation"
   ],
@@ -30,6 +33,9 @@
   "type": "module",
   "engines": {
     "node": ">=22.13"
+  },
+  "bin": {
+    "pgrls": "./dist/cli.js"
   },
   "exports": {
     ".": {
@@ -59,7 +65,7 @@
     "lint": "eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "check": "pnpm lint && pnpm typecheck && pnpm test && pnpm build",
+    "check": "pnpm lint && pnpm typecheck && pnpm build && pnpm test",
     "attw": "attw --pack . --ignore-rules no-resolution cjs-resolves-to-esm",
     "publint": "publint",
     "release": "pnpm build && changeset publish",
@@ -76,6 +82,9 @@
     "postgres": {
       "optional": true
     }
+  },
+  "optionalDependencies": {
+    "pg": "^8.13.1"
   },
   "devDependencies": {
     "@arethetypeswrong/cli": "^0.18.5",
