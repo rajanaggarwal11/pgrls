@@ -3,17 +3,19 @@
   "version": "0.1.0",
   "description": "Postgres row-level security you can actually verify. Policies as TypeScript, tenant context as a transaction, and one test that proves no table is exposed.",
   "keywords": [
+    "drizzle",
+    "drizzle-orm",
+    "multi-tenant",
+    "multitenancy",
     "postgres",
+    "postgres-js",
+    "postgres.js",
     "postgresql",
     "rls",
     "row-level-security",
-    "multi-tenant",
-    "multitenancy",
-    "tenant-isolation",
-    "drizzle",
-    "drizzle-orm",
     "security",
-    "sql"
+    "sql",
+    "tenant-isolation"
   ],
   "license": "MIT",
   "author": "Rajan Aggarwal",
@@ -38,6 +40,10 @@
       "types": "./dist/drizzle.d.ts",
       "default": "./dist/drizzle.js"
     },
+    "./postgres-js": {
+      "types": "./dist/postgres-js.d.ts",
+      "default": "./dist/postgres-js.js"
+    },
     "./package.json": "./package.json"
   },
   "files": [
@@ -60,10 +66,14 @@
     "prepublishOnly": "pnpm build"
   },
   "peerDependencies": {
-    "drizzle-orm": ">=0.30.0"
+    "drizzle-orm": ">=0.30.0",
+    "postgres": ">=3.4.0"
   },
   "peerDependenciesMeta": {
     "drizzle-orm": {
+      "optional": true
+    },
+    "postgres": {
       "optional": true
     }
   },

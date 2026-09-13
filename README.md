@@ -111,6 +111,22 @@ Run it as **the role your application connects with**, not as your migration sup
 
 **Coverage options:** `schemas` (default `["public"]`), `exclude` (names or `schema.name`), `allowUnforced`, `allowBypassingRole`. The last two exist so you can opt out deliberately; both default to the strict reading.
 
+## postgres.js
+
+```ts
+import postgres from "postgres";
+import { withPostgresJs } from "pgrls/postgres-js";
+
+const sql = postgres(url);
+
+await withPostgresJs(sql, (db) => assertFullRlsCoverage(db));
+await withPostgresJs(sql, (db) => withTenant(db, orgId, (tx) => tx.query("SELECT …")));
+```
+
+The adapter **reserves one connection** for the duration of the callback, and that is the whole point of it. postgres.js pools by default, and a pool is not a connection: over a naive `sql.unsafe` adapter, `withTenant`'s `BEGIN` lands on one connection and your next query may land on another — the tenant is set where nobody reads it, and the policies quietly return nothing. No error; an empty result. There is a test that demonstrates exactly that against a two-connection pool, and one that shows the reserved adapter doesn't have the problem.
+
+`postgres` is an optional peer dependency.
+
 ## Any driver
 
 The core needs one method:
