@@ -35,7 +35,11 @@ jobs:
         uses: changesets/action@v2
         with:
           version-script: pnpm changeset version
-          publish-script: pnpm changeset publish
+          # Publishing needs npm credentials. Until an NPM_TOKEN secret (or trusted
+          # publishing) exists, this step only opens the version PR; publishing is
+          # done locally with `pnpm changeset publish`. The moment the secret exists,
+          # publishing from CI turns itself on.
+          publish-script: ${{ secrets.NPM_TOKEN != '' && 'pnpm changeset publish' || '' }}
           commit-message: "chore: release"
           pr-title: "chore: release"
         env:
