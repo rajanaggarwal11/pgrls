@@ -183,6 +183,10 @@ That is `pg`'s shape. `postgres.js`, `slonik` and a Drizzle session each wrap to
 
 Postgres 9.5 or newer, where row-level security landed. Node 22.13 or newer. CI runs the full suite against Postgres 14, 15, 16, 17 and 18 — those are the versions actually verified.
 
+## Working with me
+
+**Need this run against a real database?** I audit Postgres tenant isolation for SaaS teams — every table, every role, the policies that do not do what they say — and fix what the audit finds. Sponsor the project, or write to me: [aggarwal11.rajan05@gmail.com](mailto:aggarwal11.rajan05@gmail.com).
+
 ## License
 
 [MIT](./LICENSE) © Rajan Aggarwal
