@@ -43,7 +43,7 @@ Exit `1` when something is exposed, `0` when nothing is, `2` when it couldn't ru
 
 **Run it as the role your application connects with.** A superuser cannot see policies, and rather than pass, the audit says so in the header and exits `1`. `pg` is an optional dependency so `npx pgrls audit` works with nothing else installed; a project that already has `postgres` (postgres.js) is used as-is.
 
-### In CI
+## In CI
 
 ```yaml
 - uses: rajanaggarwal11/pgrls-action@v1
