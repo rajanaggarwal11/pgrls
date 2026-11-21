@@ -12,10 +12,11 @@ You should get an acknowledgement within 72 hours and an assessment within a wee
 
 ## Scope
 
-`pgrls` reads `package.json`, `pnpm-workspace.yaml`, `tsconfig.json` and source files, and with `--fix` writes back to the first two. It runs no code from the workspace it inspects, spawns no subprocesses, and makes no network requests.
+`pgrls` runs SQL against the database you give it: `applyPolicy` executes the policy DDL it generates, `withTenant` sets a transaction-local setting, and the coverage audit (in a test or through `npx pgrls audit`) only reads the system catalogs. It makes no network requests other than that connection and spawns no processes.
 
 The things most worth reporting:
 
-- A path that writes outside the workspace root.
-- Input in a manifest or workspace file that causes code execution or a crash that could be exploited.
-- A `--fix` edit that destroys content it was not meant to touch.
+- Any way for a table, column, policy, role or setting name to change the SQL that `definePolicy` or `applyPolicy` generates beyond what it names.
+- A tenant id set by `withTenant` that survives its transaction, so a later borrower of the same pooled connection inherits it.
+- A table that the audit reports as protected while some role in the database can read across tenants.
+- Credentials from a connection URL appearing in audit output or errors.
