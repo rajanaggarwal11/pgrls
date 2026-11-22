@@ -1,7 +1,7 @@
 {
   "name": "pgrls",
   "version": "0.2.0",
-  "description": "Postgres row-level security you can actually verify. Policies as TypeScript, tenant context as a transaction, and one test that proves no table is exposed.",
+  "description": "Postgres row-level security you can test: policies beside the table, tenant context that can't leak across a connection pool, and one check that names every table a tenant can still read.",
   "keywords": [
     "audit",
     "cli",

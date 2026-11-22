@@ -28,7 +28,7 @@ function version(): string {
 }
 
 const HELP = `
-pgrls — Postgres row-level security you can actually verify
+pgrls — test that Postgres row-level security protects every table
 
 Usage
   pgrls audit [<connection-url>] [options]
