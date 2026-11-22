@@ -47,4 +47,7 @@ jobs:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           # Signs the published package with a link to this commit and workflow.
+          # pnpm 11's publish reads pnpm_config_* only; npm_config_* is kept for
+          # any npm fallback.
+          pnpm_config_provenance: "true"
           NPM_CONFIG_PROVENANCE: true
