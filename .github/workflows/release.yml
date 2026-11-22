@@ -19,20 +19,20 @@ jobs:
       # verifiable link back to the commit and workflow that built it.
       id-token: write
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
-      - uses: pnpm/action-setup@v6
-      - uses: actions/setup-node@v7
+      # No dependency cache here: a poisoned cache must not reach a publish.
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: 22
-          cache: pnpm
           registry-url: https://registry.npmjs.org
       - run: pnpm install --frozen-lockfile
       - run: pnpm build
 
       - name: Create release PR or publish
-        uses: changesets/action@v2
+        uses: changesets/action@ae32849d5ba541f9ae29e40e22a623bc13562f51 # v2.1.2
         with:
           version-script: pnpm changeset version
           # Publishing needs npm credentials. Until an NPM_TOKEN secret (or trusted
@@ -46,3 +46,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          # Signs the published package with a link to this commit and workflow.
+          # pnpm 11's publish reads pnpm_config_* only; npm_config_* is kept for
+          # any npm fallback.
+          pnpm_config_provenance: "true"
+          NPM_CONFIG_PROVENANCE: true

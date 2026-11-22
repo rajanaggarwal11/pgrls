@@ -15,10 +15,9 @@ test("every table is protected", async () => {
 ```
 pgrls: 3 of 14 tables are not protected.
 
-  ✗ public.audit_log      row-level security is not enabled — every row is readable by any role
-  ✗ public.webhook_event  RLS is enabled but not FORCED — the table owner bypasses it, and most
-                          applications connect as the owner of their own tables
-  ✗ public.session        RLS is enabled with no policy — every query against this table returns nothing
+  ✗ public.audit_log  row-level security is not enabled — every row is readable by any role
+  ✗ public.invoice    RLS is enabled but not FORCED — the table owner bypasses it, and most applications connect as the owner of their own tables
+  ✗ public.session    RLS is enabled with no policy — every query against this table returns nothing
 ```
 
 Run that against a multi-tenant database you didn't write and see what comes back.
@@ -39,9 +38,9 @@ pgrls: 3 of 14 tables are not protected.
   ✗ public.session    RLS is enabled with no policy — every query against this table returns nothing
 ```
 
-Exit `1` when something is exposed, `0` when nothing is, `2` when it couldn't run — so it drops straight into CI. `--json` for a stable machine-readable report, `--schema` and `--exclude` (both repeatable) to scope it. The connection string is never written to any stream, including inside error messages; prefer `DATABASE_URL` over an argument so it stays out of your shell history.
+Exit `1` when something is exposed, `0` when nothing is, `2` when it couldn't run — so it drops straight into CI. `--json` for a stable machine-readable report, `--schema` and `--exclude` to scope it (repeat the flag or pass a comma-separated list: `--exclude __drizzle_migrations,audit_log`). The connection string is never written to any stream, including inside error messages; prefer `DATABASE_URL` over an argument so it stays out of your shell history.
 
-**Run it as the role your application connects with.** A superuser cannot see policies, and rather than pass, the audit says so in the header and exits `1`. `pg` is an optional dependency so `npx pgrls audit` works with nothing else installed; a project that already has `postgres` (postgres.js) is used as-is.
+**Run it as the role your application connects with.** Superusers and roles with `BYPASSRLS` are not subject to policies at all, and a table's owner bypasses them unless the table has `FORCE ROW LEVEL SECURITY`. Over a connection that bypasses RLS, the audit says so in the header and exits `1` rather than pass. `pg` is an optional dependency so `npx pgrls audit` works with nothing else installed; a project that already has `postgres` (postgres.js) is used as-is.
 
 ## In CI
 
@@ -60,11 +59,11 @@ RLS is the right answer for tenant isolation: the database enforces it, so a for
 
 **1. The owner bypasses it.** `ENABLE ROW LEVEL SECURITY` does nothing to the table's owner. Most applications connect as the role that owns their tables, so the policy is real, the predicate is correct, and it protects nothing at all. `FORCE ROW LEVEL SECURITY` is what closes it, and `pgrls` turns it on by default.
 
-**2. Superusers bypass it entirely.** No policy, and no amount of `FORCE`, applies to a superuser or a role with `BYPASSRLS`. This is why the coverage audit checks _who it is running as_ and refuses to return a green report over such a connection — a passing audit gathered as a superuser is not evidence of anything, and silently handing one back would be the most dangerous thing this library could do.
+**2. Superusers bypass it entirely.** No policy, and no amount of `FORCE`, applies to a superuser or a role with `BYPASSRLS`. This is why the coverage audit checks _who it is running as_ and refuses to return a green report over such a connection. A passing audit gathered as a superuser says nothing about what the application's role can read.
 
 **3. An unset tenant can raise instead of denying.** The obvious predicate is `org_id = current_setting('app.tenant', true)::uuid`. Once a custom setting has been set inside a transaction and that transaction ends, it does not vanish — it reverts to the empty string. `''::uuid` raises `invalid input syntax for type uuid: ""`, so on a pooled connection every request after the first one crashes instead of returning nothing. `pgrls` wraps the setting in `nullif(…, '')`, so an unscoped query sees an empty table, which is the only safe answer.
 
-None of this is exotic. All of it is easy to get wrong once and never notice.
+All three are easy to get wrong once and never notice.
 
 Each trap is reproduced step by step, in `psql`, in [docs/rls-traps.md](./docs/rls-traps.md).
 
@@ -108,7 +107,7 @@ const invoices = await withTenant(client, orgId, async (tx) => {
 });
 ```
 
-The tenant is written with `set_config(name, value, true)`. The third argument makes it local to the transaction, so it cannot outlive the request that set it — on a pooled connection a session-level setting is inherited by whoever borrows that connection next, which is the worst bug this library could have. There is deliberately no API for setting a tenant outside a transaction.
+The tenant is written with `set_config(name, value, true)`. The third argument makes it local to the transaction, so it cannot outlive the request that set it. A session-level setting would stay on a pooled connection, and the next request to borrow that connection would run as the previous tenant. There is deliberately no API for setting a tenant outside a transaction.
 
 Using a function call rather than `SET LOCAL` also means the tenant id travels as a bind parameter instead of being interpolated into SQL.
 
@@ -171,7 +170,18 @@ interface SqlExecutor {
 }
 ```
 
-That is `pg`'s shape. `postgres.js`, `slonik` and a Drizzle session each wrap to it in a few lines. This is deliberate — the tooling that exists today is tied to one hosting provider, and tenant isolation shouldn't be.
+That is `pg`'s shape. `postgres.js`, `slonik` and a Drizzle session each wrap to it in a few lines.
+
+## How is this different from Supabase's linter?
+
+Supabase's database linter, [splinter](https://github.com/supabase/splinter), is a set of SQL lints. Its RLS lints flag tables with RLS disabled in schemas exposed through Supabase's Data API (PostgREST), RLS enabled with no policy, policies on a table whose RLS is off, and policies that are always true. Other lints cover Supabase's `auth` and storage schemas, indexes and performance. If you are on Supabase, run it.
+
+pgrls overlaps on "RLS disabled" and "RLS enabled with no policy", and adds:
+
+- **The owner bypass.** A table with RLS enabled but not `FORCE`d is reported, because its owner — often the application's own role — is not subject to the policy.
+- **Who is asking.** The audit reads the role it runs as and refuses to pass when that role is a superuser or has `BYPASSRLS`.
+- **Tenant context that cannot leak.** `withTenant` sets the tenant inside a transaction with `set_config(…, true)`, so it does not stay on a pooled connection for the next request.
+- **Any Postgres.** Neon, RDS, Cloud SQL, self-hosted: it reads `pg_class`, `pg_policy` and `pg_roles` and needs no PostgREST or Supabase schema.
 
 ## What it deliberately does not do
 
@@ -181,11 +191,11 @@ That is `pg`'s shape. `postgres.js`, `slonik` and a Drizzle session each wrap to
 
 ## Requirements
 
-Postgres 9.5 or newer, where row-level security landed. Node 22.13 or newer. CI runs the full suite against Postgres 14, 15, 16, 17 and 18 — those are the versions actually verified.
+Postgres 14+ (tested in CI on 14–18). Node 22.13 or newer.
 
 ## Working with me
 
-**Need this run against a real database?** I audit Postgres tenant isolation for SaaS teams — every table, every role, the policies that do not do what they say — and fix what the audit finds. Sponsor the project, or write to me: [aggarwal11.rajan05@gmail.com](mailto:aggarwal11.rajan05@gmail.com).
+**Need this run against a real database?** I audit Postgres tenant isolation for SaaS teams — every table, every role, the policies that do not do what they say — and fix what the audit finds. Write to me: [aggarwal11.rajan05@gmail.com](mailto:aggarwal11.rajan05@gmail.com).
 
 ## License
 

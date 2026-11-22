@@ -145,18 +145,19 @@ export function formatCoverage(report: CoverageReport): string {
     return `pgrls: all ${report.rows.length} tables are protected.`;
   }
 
-  // The role check comes first: if the connection ignores policies, nothing below
-  // it is evidence of anything.
+  // The role check comes first: over a connection that ignores policies, a clean
+  // result says nothing about what the application's role can read.
   const preamble: string[] = [];
   if (report.role.bypasses) {
     const why = report.role.superuser ? "a superuser" : "a role with BYPASSRLS";
     preamble.push(
       `pgrls: this audit ran as ${JSON.stringify(report.role.name)}, ${why}.`,
       "",
-      "  Row-level security is never applied to such a role, so every table below",
-      "  reports as protected whether it is or not. Re-run as the role your",
-      "  application actually connects with, or pass allowBypassingRole to accept",
-      "  a report that proves nothing about this connection.",
+      "  The table list below comes from the catalog and is the same for any role,",
+      "  but row-level security is never applied to this role: it reads every row",
+      "  whatever the policies say. A clean audit over this connection says nothing",
+      "  about what your application can see. Re-run as the role your application",
+      "  actually connects with, or pass allowBypassingRole to accept that.",
       "",
     );
     if (report.unprotected.length === 0) return preamble.join("\n");

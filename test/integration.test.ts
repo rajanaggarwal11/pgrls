@@ -287,8 +287,8 @@ describe("the role the audit runs as", () => {
     await applyPolicy(client, invoicePolicy);
 
     // Every table genuinely is protected — but `admin` is a superuser, so this
-    // connection ignores policies entirely. Reporting "all protected" here would
-    // be the most dangerous thing the library could do.
+    // connection ignores policies entirely. "All protected" here would say nothing
+    // about what the application's role can read.
     const report = await rlsCoverage(admin, opts);
     expect(report.unprotected).toEqual([]);
     expect(report.role.bypasses).toBe(true);
