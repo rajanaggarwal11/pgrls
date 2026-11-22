@@ -85,7 +85,7 @@ SELECT rolsuper OR rolbypassrls AS bypasses_rls
 -- must be false, or nothing else you measured means anything
 ```
 
-This is why pgrls's `assertFullRlsCoverage` reads the role it is running as and **refuses to return a passing report** over a connection that bypasses policies. A green result gathered as a superuser is not evidence of anything, and silently handing one back would be the most dangerous thing the library could do.
+This is why pgrls's `assertFullRlsCoverage` reads the role it is running as and **refuses to return a passing report** over a connection that bypasses policies. A green result gathered as a superuser says nothing about what the application's role can read.
 
 ---
 
