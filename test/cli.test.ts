@@ -156,6 +156,14 @@ describe("the audit", () => {
     expect((await audit("--exclude", "invoice", "--exclude", "audit_log")).code).toBe(0);
   });
 
+  it("exits 2, before connecting, when --schema or --exclude names nothing", async () => {
+    for (const flag of ["--schema", "--exclude"]) {
+      const r = await cli(["audit", "postgres://nobody@127.0.0.1:1/none", flag, ","]);
+      expect(r.code).toBe(2);
+      expect(r.stderr).toContain(`${flag} was given no names`);
+    }
+  });
+
   it("takes --schema as a comma-separated list as well as repeated", async () => {
     const r = await cli(["audit", APP_URL, "--schema", `pgrls_cli_empty,${SCHEMA}`, "--json"]);
     expect(r.code).toBe(1);
@@ -259,8 +267,12 @@ describe("the connection string never reaches a stream", () => {
 
 describe("listOption", () => {
   it("splits on commas, trims, drops empties, and flattens repeats", () => {
-    expect(listOption(undefined)).toBeUndefined();
-    expect(listOption(["a, b", "c", " ,"])).toEqual(["a", "b", "c"]);
-    expect(listOption([","])).toBeUndefined();
+    expect(listOption(undefined, "--schema")).toBeUndefined();
+    expect(listOption(["a, b", "c", " ,"], "--schema")).toEqual(["a", "b", "c"]);
+  });
+
+  it("refuses a list with no names in it, rather than fall back to the default", () => {
+    expect(() => listOption([","], "--schema")).toThrow("--schema was given no names");
+    expect(() => listOption([" "], "--exclude")).toThrow("--exclude was given no names");
   });
 });

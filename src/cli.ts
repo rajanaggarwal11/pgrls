@@ -41,6 +41,7 @@ Usage
 Options
   --schema <names>          Schemas to inspect: repeat it, or comma-separate. Default: public
   --exclude <tables>        Tables to skip, as name or schema.name: repeat it, or comma-separate
+                            (a name that contains a comma cannot be given)
   --allow-unforced          Count a table with RLS enabled but not FORCED as protected
   --allow-bypassing-role    Accept a report gathered as a superuser / BYPASSRLS role
   --json                    Machine-readable output (stable shape, version 1)
@@ -176,13 +177,14 @@ function toJson(report: CoverageReport, where: ReturnType<typeof describeUrl>): 
  * `--exclude a,b` and `--exclude a --exclude b` mean the same thing (pgrls-action
  * and the other CLIs pass comma-separated values). Undefined when not given.
  */
-export function listOption(value: unknown): string[] | undefined {
+export function listOption(value: unknown, flag: string): string[] | undefined {
   if (value === undefined) return undefined;
   const items = (Array.isArray(value) ? value : [value])
     .flatMap((v) => String(v).split(","))
     .map((v) => v.trim())
     .filter(Boolean);
-  return items.length ? items : undefined;
+  if (items.length === 0) throw new Error(`${flag} was given no names`);
+  return items;
 }
 
 export async function run(
@@ -195,6 +197,8 @@ export async function run(
 
   let values: Record<string, unknown>;
   let positionals: string[];
+  let schemas: string[];
+  let exclude: string[];
   try {
     ({ values, positionals } = parseArgs({
       args: argv,
@@ -209,6 +213,8 @@ export async function run(
       },
       allowPositionals: true,
     }));
+    schemas = listOption(values.schema, "--schema") ?? ["public"];
+    exclude = listOption(values.exclude, "--exclude") ?? [];
   } catch (error) {
     process.stderr.write(`${c.red("✗")} ${(error as Error).message}\n${HELP}`);
     return EXIT_ERROR;
@@ -256,8 +262,8 @@ export async function run(
 
   try {
     const report = await rlsCoverage(conn.client, {
-      schemas: listOption(values.schema) ?? ["public"],
-      exclude: listOption(values.exclude) ?? [],
+      schemas,
+      exclude,
       allowUnforced: Boolean(values["allow-unforced"]),
       allowBypassingRole: Boolean(values["allow-bypassing-role"]),
     });
